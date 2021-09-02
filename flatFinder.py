@@ -19,7 +19,7 @@ class FlatFinder:
         url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
         params = {"origins": origin,
                   "destinations": destination,
-                  "departure_time": int(datetime.datetime(2020, 9, 2, 9, 0, 0, 0).timestamp()),
+                  "departure_time": int(datetime.datetime(2021, 9, 9, 9, 0, 0, 0).timestamp()),
                   "mode": mode,
                   "units": "metric"}
 
@@ -40,6 +40,7 @@ class FlatFinder:
                 response_json = response.json()
                 if len(response_json["rows"]) != 1:
                     print("wrong number of rows!")
+                    print(response_json)
                 try:
                     times[mode] = response_json["rows"][0]["elements"][0]["duration"]["value"]
                     times["distance"] = response_json["rows"][0]["elements"][0]["distance"]["value"]
