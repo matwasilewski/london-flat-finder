@@ -45,6 +45,7 @@ class FlatFinder:
                 response_json = response.json()
                 if len(response_json["rows"]) != 1:
                     print("wrong number of rows!")
+                    print(response_json)
                 try:
                     times[mode] = response_json["rows"][0]["elements"][0]["duration"]["value"]
                     times["distance"] = response_json["rows"][0]["elements"][0]["distance"]["value"]
@@ -148,4 +149,3 @@ class FlatFinder:
         flatsDF["longitude"] = lng
 
         return flatsDF
-
