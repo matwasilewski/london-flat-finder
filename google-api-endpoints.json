@@ -1,0 +1,4 @@
+{
+    "url-google-distance-matrix": "https://maps.googleapis.com/maps/api/distancematrix/json?",
+    "url-google-geocode": "https://maps.googleapis.com/maps/api/geocode/json?"
+}
