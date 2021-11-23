@@ -2,3 +2,4 @@ api.key
 .idea
 .ipynb_checkpoints
 __pycache__
+results/*
