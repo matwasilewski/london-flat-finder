@@ -12,7 +12,8 @@ def _extract_postcode_from_address(flats_dataframe):
     postcode_regex = re.compile(
         "([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z]["
         "A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z]["
-        "A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\s?[0-9][A-Za-z]{2})")
+        "A-Ha-hJ-Yj-y][0-9][A-Za-z]?))))\s?[0-9][A-Za-z]{2})"
+    )
     postcode = re.search(postcode_regex, flats_dataframe["address"])
     flats_dataframe.loc[flats_dataframe.postcode != np.NaN] = postcode
     return flats_dataframe
@@ -40,57 +41,74 @@ class FlatFinder:
                 with open("google-api-endpoints.json") as f:
                     api_urls = json.load(f)
                     self.url_geocode = api_urls["url-google-geocode"]
-                    self.url_distance_matrix = \
-                        api_urls["url-google-distance-matrix"]
+                    self.url_distance_matrix = api_urls[
+                        "url-google-distance-matrix"
+                    ]
             else:
                 raise Exception("No GCP endpoints provided!")
 
-    def _google_maps_query(self, origin, destination, mode, time=int(
-        datetime.datetime(2020, 9, 2, 9, 0, 0, 0).timestamp())):
+    def _google_maps_query(
+        self,
+        origin,
+        destination,
+        mode,
+        time=int(datetime.datetime(2020, 9, 2, 9, 0, 0, 0).timestamp()),
+    ):
 
-        params = {"origins": origin,
-                  "destinations": destination,
-                  "departure_time": time,
-                  "mode": mode,
-                  "units": "metric"}
+        params = {
+            "origins": origin,
+            "destinations": destination,
+            "departure_time": time,
+            "mode": mode,
+            "units": "metric",
+        }
 
         if self.api_key is not None:
             params = {"key": self.api_key}
 
         payload = {}
         headers = {}
-        response = requests.request("GET",
-                                    self.url_distance_matrix,
-                                    headers=headers,
-                                    data=payload,
-                                    params=params)
+        response = requests.request(
+            "GET",
+            self.url_distance_matrix,
+            headers=headers,
+            data=payload,
+            params=params,
+        )
         return response
 
     def _get_commute_times(self, origin, destination, time="commute"):
-        times = {"distance": np.nan, "transit": np.nan, "bicycling": np.nan,
-                 "walking": np.nan}
+        times = {
+            "distance": np.nan,
+            "transit": np.nan,
+            "bicycling": np.nan,
+            "walking": np.nan,
+        }
         if time == "night":
             time_of_day = int(
-                datetime.datetime(2020, 9, 4, 2, 0, 0, 0).timestamp())
+                datetime.datetime(2020, 9, 4, 2, 0, 0, 0).timestamp()
+            )
         else:
             time_of_day = int(
-                datetime.datetime(2020, 9, 2, 9, 0, 0, 0).timestamp())
+                datetime.datetime(2020, 9, 2, 9, 0, 0, 0).timestamp()
+            )
 
         for mode in ["transit", "bicycling", "walking"]:
-            response = self._google_maps_query(origin, destination, mode,
-                                               time_of_day)
+            response = self._google_maps_query(
+                origin, destination, mode, time_of_day
+            )
             if response.status_code == 200:
                 response_json = response.json()
                 if len(response_json["rows"]) != 1:
                     print("wrong number of rows!")
                     print(response_json)
                 try:
-                    times[mode] = \
-                        response_json["rows"][0]["elements"][0]["duration"][
-                            "value"]
-                    times["distance"] = \
-                        response_json["rows"][0]["elements"][0]["distance"][
-                            "value"]
+                    times[mode] = response_json["rows"][0]["elements"][0][
+                        "duration"
+                    ]["value"]
+                    times["distance"] = response_json["rows"][0]["elements"][
+                        0
+                    ]["distance"]["value"]
                 except:
                     print("Error!")
 
@@ -104,11 +122,13 @@ class FlatFinder:
 
         payload = {}
         headers = {}
-        response = requests.request("GET",
-                                    self.url_geocode,
-                                    headers=headers,
-                                    data=payload,
-                                    params=params)
+        response = requests.request(
+            "GET",
+            self.url_geocode,
+            headers=headers,
+            data=payload,
+            params=params,
+        )
         return response
 
     def _get_coordinates(self, address):
@@ -118,8 +138,12 @@ class FlatFinder:
             if len(response_json["results"]) != 1:
                 print("wrong number of results!")
             try:
-                lat = response_json["results"][0]["geometry"]["location"]["lat"]
-                lng = response_json["results"][0]["geometry"]["location"]["lng"]
+                lat = response_json["results"][0]["geometry"]["location"][
+                    "lat"
+                ]
+                lng = response_json["results"][0]["geometry"]["location"][
+                    "lng"
+                ]
                 return lat, lng
             except:
                 print("Error!")
@@ -139,8 +163,9 @@ class FlatFinder:
         for idx, row in flats_dataframe.iterrows():
             origin = row["address"]
 
-            commute_times = self._get_commute_times(origin,
-                                                    self.travel_destination)
+            commute_times = self._get_commute_times(
+                origin, self.travel_destination
+            )
             transit[idx] = commute_times["transit"]
             bicycling[idx] = commute_times["bicycling"]
             walking[idx] = commute_times["walking"]
@@ -160,8 +185,8 @@ class FlatFinder:
             destination = row["address"]
 
             commute_times = self._get_commute_times(
-                self.nighttime_departure, destination,
-                time="night")
+                self.nighttime_departure, destination, time="night"
+            )
             late_transit[idx] = commute_times["transit"]
 
         flats_dataframe["late_transit"] = late_transit
