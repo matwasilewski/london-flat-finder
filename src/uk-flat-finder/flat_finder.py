@@ -26,19 +26,19 @@ def get_rightmove_properties_from_url(url):
 
 
 class FlatFinder:
-    def __init__(self, destination, map_functions_on=True):
-        self.map_functions = map_functions_on
+    def __init__(self, destination, use_gcp=True):
+        self.use_gcp = use_gcp
         self.travel_destination = destination
 
-        if map_functions_on:
+        if use_gcp:
             if os.path.isfile("api.key"):
                 with open("api.key") as f:
                     self.api_key = f.read().strip("\n")
             else:
                 raise Exception("No api key!")
 
-            if os.path.isfile("google-api-endpoints.json"):
-                with open("google-api-endpoints.json") as f:
+            if os.path.isfile("../../google-api-endpoints.json"):
+                with open("../../google-api-endpoints.json") as f:
                     api_urls = json.load(f)
                     self.url_geocode = api_urls["url-google-geocode"]
                     self.url_distance_matrix = api_urls[
