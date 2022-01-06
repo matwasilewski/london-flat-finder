@@ -3,7 +3,7 @@ name = "uk-flat-finder"
 version = "0.1.1"
 description = "UK flat finding made easier, with GCP and rightmove API."
 authors = ["Mateusz Wasilewski <mateusz.wasilewski@biorelate.com>"]
-s
+
 [tool.poetry.dependencies]
 python = "3.9.9"
 rightmove-webscraper = { file = "resources/rightmove_webscraper-0.1.3-py3-none-any.whl" }
